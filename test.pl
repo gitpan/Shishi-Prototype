@@ -20,29 +20,29 @@ ok(1);
 # of the test code):
 
 my $parser = new Shishi ("test parser");
+my $nodec = Shishi::Node->new->add_decision(
+        new Shishi::Decision(target => 'c', type => 'char', action => 0)
+);
+my $nodeb = Shishi::Node->new->add_decision(
+        new Shishi::Decision(target => 'b', type => 'char', action => 4,
+        next_node=>$nodec));
+
 $parser->start_node->add_decision(
  new Shishi::Decision(target => 'a', type => 'char', action => 4,
-                          next_node => Shishi::Node->new->add_decision(
-    new Shishi::Decision(target => 'b', type => 'char', action => 4,
-                          next_node => Shishi::Node->new->add_decision(
-        new Shishi::Decision(target => 'c', type => 'char', action => 0)
-                            ))
-                        ))
+                          next_node => $nodeb)
 );
-$parser->parse_text("ab");
-ok(!$parser->execute);
+$parser->add_node($nodeb);
+$parser->add_node($nodec);
+ok(!$parser->execute("ab"));
 
-$parser->parse_text("abc");
-ok($parser->execute);
+ok($parser->execute("abc"));
 
-$parser->parse_text("babdabc");
-ok(!$parser->execute());
+ok(!$parser->execute("babdabc"));
 
 $parser->start_node->add_decision(
  new Shishi::Decision(type => 'skip', next_node => $parser->start_node,
  action => 4)
 );
-$parser->parse_text("babdabc");
-ok($parser->execute());
+ok($parser->execute("babdabc"));
 
 ok(ACTION_SHIFT);

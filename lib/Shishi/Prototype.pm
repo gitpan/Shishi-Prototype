@@ -1,3 +1,6 @@
+
+# Flaws: action code and decision code not separated.
+
 package Shishi::Prototype;
 $Shishi::Debug = 0;
 1;
@@ -23,6 +26,12 @@ sub new {
     return $o;
 }
 
+sub new_mo {
+    bless {
+        text => $_[1]
+    }, "Shishi::Match";
+}
+
 sub add_node {
     my $self = shift;
     my $node = shift;
@@ -34,12 +43,12 @@ sub add_node {
 sub execute {
     my $self = shift;
     my $text = shift;
-    $self->start_node->execute($self) > 0;
+    $self->start_node->execute($self, Shishi->new_mo($text)) > 0;
 }
 
 sub start_node { $_[0]->{nodes}->[0] }
 
-sub parse_text { my $self = shift; @_ ? $self->{text} = shift : $self->{text};  } 
+sub Shishi::Match::parse_text { my $self = shift; @_ ? $self->{text} = shift : $self->{text};  } 
 
 sub dump {
     my $parser = shift;
@@ -81,7 +90,53 @@ sub dump {
     }
 }
 
-# Create a parser for 'a b c'
+sub as_dot {
+    require GraphViz;
+    my $g = GraphViz->new(rankdir => "LR");
+    my $parser = shift;
+    my @nodes = @{$parser->{nodes}};
+    $g->add_node($_, shape=>"circle") for 0..$#nodes;
+    my %name2num;
+    $name2num{$nodes[$_]}=$_ for 0..$#nodes;
+    for my $node_num (0..$#nodes) {
+        my $n = $nodes[$node_num];
+        for ($n->decisions) {
+            my $dec = $g->add_node(
+                label => "$_->{type}".(
+                     exists $_->{target} ? " ($_->{target}) " : 
+                     (exists $_->{code} && " ($_->{code}) ")
+                ),
+                shape => "box"
+            );
+            $g->add_edge($node_num, $dec, (exists $_->{hint} ? (label => $_->{hint}) : ()));
+            if ($_->{action} == ACTION_FINISH) {
+                my $targ = $g->add_node(
+                    label => "DONE", style => "bold", shape => "circle");
+                $g->add_edge($dec, $targ);
+            } elsif ($_->{action} == ACTION_FAIL) {
+                my $targ = $g->add_node(
+                    label => "FAIL", style => "bold", shape => "circle");
+                $g->add_edge($dec, $targ);
+            } elsif ($_->{action} == ACTION_SHIFT) {
+                my $targ = $g->add_node(
+                    label => "SHIFT", style => "bold", shape => "circle");
+                $g->add_edge($dec, $targ);
+            } elsif ($_->{action} == ACTION_REDUCE) {
+                my $targ = $g->add_node(
+                    label => "REDUCE", style => "bold", shape => "circle");
+                $g->add_edge($dec, $targ);
+            } elsif ($_->{action} == ACTION_CONTINUE) {
+                $g->add_edge($dec, exists $name2num{$_->{next_node}} ?
+                        $name2num{$_->{next_node}} : $_->{next_node});
+            } elsif ($_->{action} == ACTION_CODE) {
+                my $targ = $g->add_node( 
+                    label => "CODE", style => "bold", shape => "circle");
+                $g->add_edge($dec, $targ);
+            }   
+        }
+    }
+    return $g->_as_debug;
+}
 
 1;
 

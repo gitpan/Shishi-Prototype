@@ -1,5 +1,8 @@
 Revision history for Perl extension Shishi::Prototype.
 
+0.04 - Fri Aug  2 11:39:57 BST 2002
+    - Grmph. Fun with sticky tags.
+
 0.03 - Fri Aug  2 11:20:01 BST 2002
     - Add debug method for dumping.
     - REMOVED RECURSION! YAY!

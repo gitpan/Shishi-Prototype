@@ -3,6 +3,6 @@ use ExtUtils::MakeMaker;
 # the contents of the Makefile that is written.
 WriteMakefile(
     'NAME'		=> 'Shishi::Prototype',
-    'VERSION'   => '0.3',
+    'VERSION'   => '0.4',
     'PREREQ_PM'		=> {}, # e.g., Module::Name => 1.1
 );

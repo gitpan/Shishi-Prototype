@@ -1,5 +1,9 @@
 Revision history for Perl extension Shishi::Prototype.
 
+0.03 - Fri Aug  2 11:20:01 BST 2002
+    - Add debug method for dumping.
+    - REMOVED RECURSION! YAY!
+
 0.02  Wed Jul  3 14:37:10 BST 2002
     - Add as_dot method for graphing.
     - Fixed a few small bugs.

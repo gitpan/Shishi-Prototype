@@ -1,0 +1,6 @@
+Revision history for Perl extension Shishi::Prototype.
+
+0.01  Sun Jun 30 14:58:05 2002
+	- original version; created by h2xs 1.1.1.4 with options
+		-AX -n Shishi::Prototype
+
